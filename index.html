@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>SRT and Video Searcher</title>
+    <style>
+      #video-part{
+        width:70%;
+        float: left;
+      }
+
+      #search-part{
+        width:30%;
+        float: left;
+      }
+    </style>
+    <script src="player.js"></script>
+  </head>
+  <body>
+    <div id="video-part">
+      <video id="myVideo" controls>
+        <source src="testvideo/01E01.webm" type="video/WebM">
+      </video>
+      <dic id="controlButtons">
+        <button>7 <-</button>
+        <button>5 <-</button>
+        <button>3 <-</button>
+        <button>1 <-</button>
+        <button>5 -> </button>
+        <button>10 -></button>
+        <button>15 -></button>
+      </dic>
+    </div>
+
+    <div id="search-part">
+      <div id="inputbox">
+        <input id="search-text" type="text">
+        <button id="search-btn">Search</button>
+      </div>
+      <div id="resultbox">
+        
+      </div>
+    </div>
+    <!--이 애플리케이션은 node <script>document.write(process.version)</script>,-->
+    <!--Chrome <script>document.write(process.versions.chrome)</script>,-->
+    <!--Electron <script>document.write(process.versions.electron)</script>을 사용합니다.-->
+  </body>
+</html>

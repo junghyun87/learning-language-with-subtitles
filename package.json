@@ -1,0 +1,10 @@
+{
+  "name"    : "your-app",
+  "version" : "0.1.0",
+  "main"    : "main.js",
+  "author": "Jung-Hyun Kwon",
+  "license": "ISC",
+  "dependencies": {
+    "recursive-readdir": "^2.0.0"
+  }
+}
