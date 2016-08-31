@@ -108,7 +108,7 @@ onload = function(){
 
 
     var videoPart = document.getElementById("video-part");
-    videoPart.setAttribute("tabindex",-1);
+    videoPart.setAttribute("tabindex",1);
     videoPart.addEventListener("keydown", function(event){
         var vid = document.getElementById("myVideo");
         if (event.keyCode == 32){
