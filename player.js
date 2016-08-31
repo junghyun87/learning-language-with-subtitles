@@ -147,6 +147,7 @@ onload = function(){
     });
 
     var searchbox = document.getElementById("search-text");
+    searchbox.setAttribute("tabindex",2);
     searchbox.focus();
     searchbox.addEventListener("keydown", function(event){
         if (event.keyCode == 13){
