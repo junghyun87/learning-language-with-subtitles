@@ -5,13 +5,14 @@
     <title>SRT and Video Searcher</title>
     <style>
       #video-part{
-        width:70%;
+        width:65%;
         float: left;
+        height: 500px;
       }
 
       #search-part{
         width:30%;
-        float: left;
+        float: right;
       }
     </style>
     <script src="player.js"></script>
@@ -20,6 +21,7 @@
     <div id="video-part">
       <video id="myVideo" controls>
         <source src="testvideo/01E01.webm" type="video/WebM">
+        <track label="English" kind="subtitles" srclang="en" src="testvideo/01E01.vtt" default>
       </video>
       <dic id="controlButtons">
         <button>7 <-</button>
@@ -37,7 +39,7 @@
         <input id="search-text" type="text">
         <button id="search-btn">Search</button>
       </div>
-      <div id="resultbox">
+      <div id="resultbox" style="overflow:scroll; height:500px;">
         
       </div>
     </div>

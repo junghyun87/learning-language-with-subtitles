@@ -12,13 +12,13 @@ let win;
 
 function createWindow () {
   // 새로운 브라우저 창을 생성합니다.
-  win = new BrowserWindow({width: 900, height: 600});
+  win = new BrowserWindow({width: 1000, height: 600});
 
   // 그리고 현재 디렉터리의 index.html을 로드합니다.
   win.loadURL(`file://${__dirname}/index.html`);
 
   // 개발자 도구를 엽니다.
-  win.webContents.openDevTools();
+  // win.webContents.openDevTools();
 
   // 창이 닫히면 호출됩니다.
   win.on('closed', () => {
