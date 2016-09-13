@@ -37,7 +37,7 @@
         <source src="testvideo/01E01.webm" type="video/WebM">
         <track label="English" kind="subtitles" srclang="en" src="testvideo/01E01.vtt" default>
       </video>
-      <dic id="controlButtons">
+      <div id="controlButtons">
         <button>7 <-</button>
         <button>5 <-</button>
         <button>3 <-</button>
@@ -45,10 +45,15 @@
         <button>5 -> </button>
         <button>10 -></button>
         <button>15 -></button>
-      </dic>
+      </div>
     </div>
 
     <div id="search-part">
+      <div id="search-directory-box">
+        <button id="search-directory-button">Set Search Folder</button>
+        <input id="search-directory-display" type="text" readonly>
+        <input id="search-directory-input" type="file" style="display: none" webkitdirectory>
+      </div>
       <div id="inputbox">
         <input id="search-text" type="text">
         <button id="search-btn">Search</button>

@@ -29,7 +29,7 @@ exports.searchText = function(dirPath, textToSearch, callback){
                 stringData = stringData.trim();
                 stringData = stringData.replace(/\r/g, '');
 
-                var checkExistReg = new RegExp(textToSearch, "i");
+                var checkExistReg = new RegExp(textToSearch, "i"); //i for case insensitive
                 // if (checkExistReg.test(stringData) === true){
                 //     console.log(srtFile);
                 // }

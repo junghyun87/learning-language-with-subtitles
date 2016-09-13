@@ -7,7 +7,7 @@ var srtSearcher = require('./srt-searcher');
 var vtt = require('srt-to-vtt');
 var filereader = require('filereader-stream');
 
-var MYAPP = {bookmarkedTimePoint:0};
+var MYAPP = {bookmarkedTimePoint:0, searchDirectory:"/Users/junghyun/Movies/modernfamily_s1"};
 
 
 function showMatchedItems(matchedItems){
@@ -82,7 +82,7 @@ function playVideoAtSepecificTime(fileName, startTimeInSec){
         track.setAttribute('label','English');
         track.setAttribute('kind','subtitles');
         vid.appendChild(track);
-
+        vid.textTracks[0].mode='hidden';
         vid.load();
     }
 
@@ -93,12 +93,25 @@ function playVideoAtSepecificTime(fileName, startTimeInSec){
 
 function handleSearchBtnClick(){
     var searchText = document.getElementById("search-text").value;
-    srtSearcher.searchText("/Users/junghyun/Movies/modernfamily_s1", searchText, showMatchedItems);
+    srtSearcher.searchText(MYAPP.searchDirectory, searchText, showMatchedItems);
     var resultBox = document.getElementById("resultbox");
     resultBox.scrollTop = 0;
 }
 
 onload = function(){
+
+    document.getElementById('search-directory-button').addEventListener('click', _ => {
+       document.getElementById('search-directory-input').click();
+    });
+
+    var searchDirectoryInput = document.getElementById("search-directory-input");
+    var searchDirectoryDisplay = document.getElementById("search-directory-display");
+    searchDirectoryDisplay.value = MYAPP.searchDirectory;
+    searchDirectoryInput.addEventListener("change", function(){
+        MYAPP.searchDirectory = this.files[0].path;
+        searchDirectoryDisplay.value = this.files[0].path;
+    });
+
     var searchButton = document.getElementById("search-btn");
     searchButton.addEventListener("click", handleSearchBtnClick);
 
@@ -120,7 +133,16 @@ onload = function(){
         } else if (event.keyCode === 66){
             //push b
             MYAPP.bookmarkedTimePoint = vid.currentTime;
-        } else {
+        } else if (event.keyCode === 83){
+            //push s
+            if (vid.textTracks[0].mode === 'hidden'){
+                vid.textTracks[0].mode = "showing";
+            }else{
+                vid.textTracks[0].mode = "hidden";
+            }
+        }
+
+        else {
             if (vid.currentTime){
                 var backSec = 0;
                 if (event.keyCode === 90){
