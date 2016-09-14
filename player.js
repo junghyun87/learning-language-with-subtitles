@@ -4,7 +4,7 @@
  */
 
 var srtSearcher = require('./srt-searcher');
-var vtt = require('srt-to-vtt');
+// var vtt = require('srt-to-vtt');
 var filereader = require('filereader-stream');
 
 var MYAPP = {bookmarkedTimePoint:0, searchDirectory:"/Users/junghyun/Movies/modernfamily_s1"};
