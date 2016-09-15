@@ -7,7 +7,7 @@ var srtSearcher = require('./srt-searcher');
 // var vtt = require('srt-to-vtt');
 var filereader = require('filereader-stream');
 
-var MYAPP = {bookmarkedTimePoint:0, searchDirectory:"/Users/junghyun/Movies/modernfamily_s1"};
+var MYAPP = {bookmarkedTimePoint:0, searchDirectory:""};
 
 
 function showMatchedItems(matchedItems){
@@ -107,11 +107,6 @@ onload = function(){
     var searchDirectoryInput = document.getElementById("search-directory-input");
 
     var searchDirectoryDisplay = document.getElementById("search-directory-display");
-
-    //test용
-    searchDirectoryDisplay.value = MYAPP.searchDirectory;
-    searchDirectoryDisplay.setAttribute("title",MYAPP.searchDirectory);
-    //test용 끝
 
     searchDirectoryInput.addEventListener("change", function(){
         MYAPP.searchDirectory = this.files[0].path;
