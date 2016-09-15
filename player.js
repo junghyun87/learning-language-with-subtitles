@@ -105,11 +105,18 @@ onload = function(){
     });
 
     var searchDirectoryInput = document.getElementById("search-directory-input");
+
     var searchDirectoryDisplay = document.getElementById("search-directory-display");
+
+    //test용
     searchDirectoryDisplay.value = MYAPP.searchDirectory;
+    searchDirectoryDisplay.setAttribute("title",MYAPP.searchDirectory);
+    //test용 끝
+
     searchDirectoryInput.addEventListener("change", function(){
         MYAPP.searchDirectory = this.files[0].path;
         searchDirectoryDisplay.value = this.files[0].path;
+        searchDirectoryDisplay.setAttribute("title",this.files[0].path);
     });
 
     var searchButton = document.getElementById("search-btn");
