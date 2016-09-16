@@ -3,12 +3,41 @@
  * reference : subtitle - https://developer.mozilla.org/en-US/Apps/Fundamentals/Audio_and_video_delivery/Adding_captions_and_subtitles_to_HTML5_video
  */
 
+
+
 var srtSearcher = require('./srt-searcher');
 // var vtt = require('srt-to-vtt');
 var filereader = require('filereader-stream');
 
 var MYAPP = {bookmarkedTimePoint:0, searchDirectory:""};
 
+
+const {remote} = require('electron');
+const {Menu} = remote;
+
+// define template
+const template = [
+    {
+        label: 'Srt-Searcher',
+        submenu: [
+            {
+                label: '단축키',
+                click: function() {
+                    alert("z: -7, x: -5, c: -3, v: -1\n" +
+                        "n: +5, m: +10, ,: +15\n" +
+                        "space: 일시정지\n" +
+                        "g: 북마크로 이동\n" +
+                        "b: 북마크\n" +
+                        "s: 자막 켜기/끄기");
+                },
+                accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I'
+            }
+        ]
+    }
+];
+
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
 
 function showMatchedItems(matchedItems){
     var resultbox = document.getElementById("resultbox");
