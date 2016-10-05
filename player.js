@@ -3,10 +3,9 @@
  * reference : subtitle - https://developer.mozilla.org/en-US/Apps/Fundamentals/Audio_and_video_delivery/Adding_captions_and_subtitles_to_HTML5_video
  */
 
+//http://www.w3schools.com/tags/av_event_loadeddata.asp
+//http://stackoverflow.com/questions/635706/how-to-scroll-to-an-element-inside-a-div
 
-
-var srtSearcher = require('./srt-searcher');
-// var vtt = require('srt-to-vtt');
 var filereader = require('filereader-stream');
 
 var MYAPP = {bookmarkedTimePoint:0, searchDirectory:"", videoPath:""};
@@ -15,29 +14,29 @@ var MYAPP = {bookmarkedTimePoint:0, searchDirectory:"", videoPath:""};
 const {remote} = require('electron');
 const {Menu} = remote;
 
-// define template
-const template = [
-    {
-        label: 'Srt-Searcher',
-        submenu: [
-            {
-                label: '단축키',
-                click: function() {
-                    alert("z: -7, x: -5, c: -3, v: -1\n" +
-                        "n: +5, m: +10, ,: +15\n" +
-                        "space: 일시정지\n" +
-                        "g: 북마크로 이동\n" +
-                        "b: 북마크\n" +
-                        "s: 자막 켜기/끄기");
-                },
-                accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I'
-            }
-        ]
-    }
-];
-
-const menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
+// // define template
+// const template = [
+//     {
+//         label: 'Srt-Searcher',
+//         submenu: [
+//             {
+//                 label: '단축키',
+//                 click: function() {
+//                     alert("z: -7, x: -5, c: -3, v: -1\n" +
+//                         "n: +5, m: +10, ,: +15\n" +
+//                         "space: 일시정지\n" +
+//                         "g: 북마크로 이동\n" +
+//                         "b: 북마크\n" +
+//                         "s: 자막 켜기/끄기");
+//                 },
+//                 accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I'
+//             }
+//         ]
+//     }
+// ];
+//
+// const menu = Menu.buildFromTemplate(template);
+// Menu.setApplicationMenu(menu);
 
 function showSubtitles(videoPath){
     console.log("showSubtitles called");
@@ -46,43 +45,44 @@ function showSubtitles(videoPath){
     var videoName =  fileNameOnly + ".webm";
     var subtitleName = fileNameOnly + ".vtt";
 
-    var vid = document.getElementById("myVideo");
-    var sourceEle = vid.getElementsByTagName("source")[0];
-    sourceEle.setAttribute("src",videoName);
+    //이전 비디오 element는 지우고 새로운 비디오 element 생성
+    var oldVidEle = document.getElementsByTagName('video')[0];
+    oldVidEle.parentNode.removeChild(oldVidEle);
 
-    var trackEle = vid.getElementsByTagName("track")[0]
-    trackEle.setAttribute("src",subtitleName);
+    var vidEle = document.createElement('video');
+    vidEle.id = "myVideo";
+    vidEle.controls = true;
 
-    vid.addEventListener("loadstart", function(){
-        console.log("loadstart called");
+    var sourceEle = document.createElement("source");
+    sourceEle.type = "video/webm";
+    sourceEle.src = videoName;
+    vidEle.appendChild(sourceEle);
+
+    var trackEle = document.createElement("track");
+    trackEle.label = "English";
+    trackEle.kind = "subtitles";
+    trackEle.srclang = "en";
+    trackEle.src = subtitleName;
+    //default로 지정해야 수동으로 subtitle을 켜지 않아도 trackEle에 대한 load 이벤트가 호출됨
+    trackEle.default = true;
+    vidEle.appendChild(trackEle);
+
+    //load를 호출해야 play가 됨
+    vidEle.load();
+
+    trackEle.addEventListener("load", function(){
+        console.log("track load called");
+
         var resultbox = document.getElementById("resultbox");
-        // var parentEle = resultbox.parentNode;
-        // parentEle.removeChild(resultbox);
         while(resultbox.firstChild){
             resultbox.removeChild(resultbox.firstChild);
         }
-    });
 
-    vid.addEventListener("loadedmetadata", function(){
-        console.log("loadedmetadata called");
-        var textTrack = vid.textTracks[0];
-        textTrack.mode="hidden";
-        textTrack.oncuechange = function(e){
-            var cue = this.activeCues[0];
-            if (cue){
-                var oldCue = document.getElementsByClassName("selected")[0];
-                if (oldCue){
-                    oldCue.className = "subtitle";
-                }
-                var activeP = document.getElementById('cue-'+cue.id);
-                activeP.className = "subtitle selected";
-            }
-        };
-
-        // var newResultbox = document.createElement('div');
-        // newResultbox.id = "resultbox";
+        var textTrack = this.track;
+        textTrack.mode = 'hidden';
         var resultbox = document.getElementById("resultbox");
 
+        //큐를 순서대로 출력하기 위해 Promise 사용
         var sequence = Promise.resolve();
         [].forEach.call(textTrack.cues, function( cue ) {
             sequence = sequence.then(function(){
@@ -90,15 +90,51 @@ function showSubtitles(videoPath){
                 var subtitleNode = document.createElement("p");
                 subtitleNode.id = 'cue-'+cueId;
                 subtitleNode.className = 'subtitle';
+                // subtitleNode.setAttribute("data-starttime", cue.startTime);
                 subtitleNode.appendChild(document.createTextNode(cue.text));
+                subtitleNode.addEventListener('click', function(){
+                    vidEle.currentTime = cue.startTime;
+                    MYAPP.bookmarkedTimePoint = vidEle.currentTime;
+                    vidEle.focus();
+                });
+
                 resultbox.appendChild(subtitleNode);
             });
         });
 
-        vid.play();
+        //재생이 될 때 현재 자막을 강조하고 자동 스크롤링
+        textTrack.oncuechange = function(e){
+            var cue = this.activeCues[0];
+            if (cue){
+                MYAPP.bookmarkedTimePoint = vidEle.currentTime;
+                var oldCue = document.getElementsByClassName("selected")[0];
+                if (oldCue){
+                    oldCue.className = "subtitle";
+                }
+                var activeP = document.getElementById('cue-'+cue.id);
+                activeP.className = "subtitle selected";
+                //scrollTop은 scroll 속성을 가진 해당 엘리먼트의 위치를 0으로한 포지셔닝
+                //offsetTop은 static 이외의 position을 가진 부모 element의 위치를 0으로한 포지셔닝
+                if (activeP.previousElementSibling){
+                    resultbox.scrollTop = activeP.previousElementSibling.offsetTop - resultbox.offsetTop;
+                } else {
+                    resultbox.scrollTop = activeP.offsetTop - resultbox.offsetTop;
+                }
+
+
+            }
+        };
     });
 
-    // vid.load();
+    //비디오 이벤트 호출 순서는 http://www.w3schools.com/tags/av_event_loadeddata.asp를 참고
+    vidEle.addEventListener("loadeddata", function(event){
+        console.log("loadeddata called");
+        vidEle.play();
+    });
+
+
+    var videopartEle = document.getElementById("video-part");
+    videopartEle.appendChild(vidEle);
 }
 
 onload = function(){
@@ -108,8 +144,10 @@ onload = function(){
     });
 
     var searchDirectoryInput = document.getElementById("search-directory-input");
-
     var searchDirectoryDisplay = document.getElementById("search-directory-display");
+    var videoPart = document.getElementById("video-part");
+    var subtitleshowed = false;
+    var showSubtitleBtn = document.getElementById("btn_show_subtitles");
 
     searchDirectoryInput.addEventListener("change", function(){
         var videoPath = this.files[0].path;
@@ -117,13 +155,10 @@ onload = function(){
         searchDirectoryDisplay.setAttribute("title",this.files[0].path);
 
         showSubtitles(videoPath);
+
+        videoPart.focus();
     });
 
-    // var searchButton = document.getElementById("search-btn");
-    // searchButton.addEventListener("click", handleSearchBtnClick);
-
-
-    var videoPart = document.getElementById("video-part");
     videoPart.setAttribute("tabindex",1);
     videoPart.addEventListener("keydown", function(event){
         var vid = document.getElementById("myVideo");
@@ -147,6 +182,9 @@ onload = function(){
             }else{
                 vid.textTracks[0].mode = "hidden";
             }
+        } else if (event.keyCode === 72){
+            //push h
+            showSubtitleBtn.click();
         }
 
         else {
@@ -181,34 +219,17 @@ onload = function(){
 
     });
 
-    // var searchbox = document.getElementById("search-text");
-    // searchbox.setAttribute("tabindex",2);
-    // searchbox.focus();
-    // searchbox.addEventListener("keydown", function(event){
-    //     if (event.keyCode == 13){
-    //         var searchButton = document.getElementById("search-btn");
-    //         handleSearchBtnClick();
-    //     }
-    // });
 
-}
+    //h를 누르면 가려진 자막을 볼 수 있음
+    showSubtitleBtn.addEventListener('click', function(){
 
-
+       var subtitles = document.getElementsByClassName("subtitle");
+       var color = subtitleshowed?'white':'black';
+        subtitleshowed = !subtitleshowed;
+        for (var i=0;i<subtitles.length;i++){
+           subtitles[i].style.color=color;
+       }
+    });
 
 
-// function timeS(val) {
-//     var regex = /(\d+):(\d{2}):(\d{2}),(\d{3})/;
-//     var parts = regex.exec(val);
-//
-//     if (parts === null) {
-//         return 0;
-//     }
-//
-//     for (var i = 1; i < 5; i++) {
-//         parts[i] = parseInt(parts[i], 10);
-//         if (isNaN(parts[i])) parts[i] = 0;
-//     }
-//
-//     // hours + minutes + seconds
-//     return parts[1] * 3600 + parts[2] * 60 + parts[3];
-// }
+};
