@@ -55,7 +55,7 @@
         cursor: pointer;
       }
 
-      #selected{
+      .selected{
         background-color: #DEE4CD;
       }
 
@@ -69,27 +69,15 @@
           <source src="" type="video/WebM">
           <track label="English" kind="subtitles" srclang="en" src="" default>
         </video>
-        <!--<div id="controlButtons">-->
-          <!--<button>7 <-</button>-->
-          <!--<button>5 <-</button>-->
-          <!--<button>3 <-</button>-->
-          <!--<button>1 <-</button>-->
-          <!--<button>5 -> </button>-->
-          <!--<button>10 -></button>-->
-          <!--<button>15 -></button>-->
-        <!--</div>-->
       </div>
 
       <div id="search-part">
         <div id="search-directory-box">
-          <button id="search-directory-button">Set Search Folder</button>
+          <button id="search-directory-button">Set a video</button>
           <input id="search-directory-display" type="text" readonly>
-          <input id="search-directory-input" type="file" style="display: none" webkitdirectory>
+          <input id="search-directory-input" type="file" accept="video/webm" style="display: none">
         </div>
-        <div id="inputbox">
-          <input id="search-text" type="text">
-          <button id="search-btn">Search</button>
-        </div>
+        <div id="options"><p>show stars, show subtitles</p></div>
         <div id="resultbox">
 
         </div>

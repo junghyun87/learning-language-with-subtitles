@@ -9,7 +9,7 @@ var srtSearcher = require('./srt-searcher');
 // var vtt = require('srt-to-vtt');
 var filereader = require('filereader-stream');
 
-var MYAPP = {bookmarkedTimePoint:0, searchDirectory:""};
+var MYAPP = {bookmarkedTimePoint:0, searchDirectory:"", videoPath:""};
 
 
 const {remote} = require('electron');
@@ -39,92 +39,66 @@ const template = [
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
-function showMatchedItems(matchedItems){
-    var resultbox = document.getElementById("resultbox");
-    resultbox.innerHTML = "";
-    matchedItems.forEach(function(matchedItem){
-        var fileNameNode = document.createElement("p");
-        fileNameNode.className = "fileName";
-        var index_fileNameShort = matchedItem.fileName.lastIndexOf("/");
-        var fileNameShort = matchedItem.fileName.slice(index_fileNameShort+1);
-        fileNameNode.appendChild(document.createTextNode(fileNameShort));
-        resultbox.appendChild(fileNameNode);
-        matchedItem.subtitles.forEach(function(subtitle){
-            // var startTimeEle = document.createElement("button");
-            // startTimeEle.textContent = subtitle.startTime;
-            var startTimeInSec = timeS(subtitle.startTime);
-            // startTimeEle.onclick = function(event){
-            //     console.log("open", matchedItem.fileName, subtitle.startTime);
-            //     playVideoAtSepecificTime(matchedItem.fileName, startTimeInSec);
-            //     var videoPart = document.getElementById("video-part");
-            //     videoPart.focus();
-            // };
-            // resultbox.appendChild(startTimeEle);
-
-            var subtitleNode = document.createElement("p");
-            // subtitleNode.className = 'subtitle unselected';
-            subtitleNode.className = 'subtitle';
-            subtitleNode.appendChild(document.createTextNode(subtitle.text));
-
-            subtitleNode.onclick = function(event){
-                var selectedEle = document.getElementById('selected');
-                if (selectedEle){
-                    selectedEle.removeAttribute("id");
-                }
-                event.target.id = 'selected';
-                console.log("open", matchedItem.fileName, subtitle.startTime);
-                playVideoAtSepecificTime(matchedItem.fileName, startTimeInSec);
-                var videoPart = document.getElementById("video-part");
-                videoPart.focus();
-            };
-
-            resultbox.appendChild(subtitleNode);
-
-        });
-    });
-}
-
-
-function playVideoAtSepecificTime(fileName, startTimeInSec){
-
-    var index = fileName.lastIndexOf(".");
-    var fileNameOnly = fileName.slice(0,index);
+function showSubtitles(videoPath){
+    console.log("showSubtitles called");
+    var index = videoPath.lastIndexOf(".");
+    var fileNameOnly = videoPath.slice(0,index);
     var videoName =  fileNameOnly + ".webm";
     var subtitleName = fileNameOnly + ".vtt";
 
     var vid = document.getElementById("myVideo");
     var sourceEle = vid.getElementsByTagName("source")[0];
-    var oldSrc = sourceEle.getAttribute("src");
+    sourceEle.setAttribute("src",videoName);
 
-    if (oldSrc !== videoName){
-        if(vid.paused !== true){
-            vid.pause();
+    var trackEle = vid.getElementsByTagName("track")[0]
+    trackEle.setAttribute("src",subtitleName);
+
+    vid.addEventListener("loadstart", function(){
+        console.log("loadstart called");
+        var resultbox = document.getElementById("resultbox");
+        // var parentEle = resultbox.parentNode;
+        // parentEle.removeChild(resultbox);
+        while(resultbox.firstChild){
+            resultbox.removeChild(resultbox.firstChild);
         }
-        sourceEle.setAttribute("src",videoName);
+    });
 
-        if (vid.querySelector('track')){
-            vid.removeChild(vid.querySelector('track'));
-        }
-        var track = document.createElement('track');
-        track.setAttribute('default', 'default');
-        track.setAttribute('src',subtitleName);
-        track.setAttribute('label','English');
-        track.setAttribute('kind','subtitles');
-        vid.appendChild(track);
-        vid.textTracks[0].mode='hidden';
-        vid.load();
-    }
+    vid.addEventListener("loadedmetadata", function(){
+        console.log("loadedmetadata called");
+        var textTrack = vid.textTracks[0];
+        textTrack.mode="hidden";
+        textTrack.oncuechange = function(e){
+            var cue = this.activeCues[0];
+            if (cue){
+                var oldCue = document.getElementsByClassName("selected")[0];
+                if (oldCue){
+                    oldCue.className = "subtitle";
+                }
+                var activeP = document.getElementById('cue-'+cue.id);
+                activeP.className = "subtitle selected";
+            }
+        };
 
-    vid.currentTime = startTimeInSec;
-    MYAPP.bookmarkedTimePoint = startTimeInSec;
-    vid.play();
-}
+        // var newResultbox = document.createElement('div');
+        // newResultbox.id = "resultbox";
+        var resultbox = document.getElementById("resultbox");
 
-function handleSearchBtnClick(){
-    var searchText = document.getElementById("search-text").value;
-    srtSearcher.searchText(MYAPP.searchDirectory, searchText, showMatchedItems);
-    var resultBox = document.getElementById("resultbox");
-    resultBox.scrollTop = 0;
+        var sequence = Promise.resolve();
+        [].forEach.call(textTrack.cues, function( cue ) {
+            sequence = sequence.then(function(){
+                var cueId = cue.id;
+                var subtitleNode = document.createElement("p");
+                subtitleNode.id = 'cue-'+cueId;
+                subtitleNode.className = 'subtitle';
+                subtitleNode.appendChild(document.createTextNode(cue.text));
+                resultbox.appendChild(subtitleNode);
+            });
+        });
+
+        vid.play();
+    });
+
+    // vid.load();
 }
 
 onload = function(){
@@ -138,13 +112,15 @@ onload = function(){
     var searchDirectoryDisplay = document.getElementById("search-directory-display");
 
     searchDirectoryInput.addEventListener("change", function(){
-        MYAPP.searchDirectory = this.files[0].path;
+        var videoPath = this.files[0].path;
         searchDirectoryDisplay.value = this.files[0].path;
         searchDirectoryDisplay.setAttribute("title",this.files[0].path);
+
+        showSubtitles(videoPath);
     });
 
-    var searchButton = document.getElementById("search-btn");
-    searchButton.addEventListener("click", handleSearchBtnClick);
+    // var searchButton = document.getElementById("search-btn");
+    // searchButton.addEventListener("click", handleSearchBtnClick);
 
 
     var videoPart = document.getElementById("video-part");
@@ -205,34 +181,34 @@ onload = function(){
 
     });
 
-    var searchbox = document.getElementById("search-text");
-    searchbox.setAttribute("tabindex",2);
-    searchbox.focus();
-    searchbox.addEventListener("keydown", function(event){
-        if (event.keyCode == 13){
-            var searchButton = document.getElementById("search-btn");
-            handleSearchBtnClick();
-        }
-    });
+    // var searchbox = document.getElementById("search-text");
+    // searchbox.setAttribute("tabindex",2);
+    // searchbox.focus();
+    // searchbox.addEventListener("keydown", function(event){
+    //     if (event.keyCode == 13){
+    //         var searchButton = document.getElementById("search-btn");
+    //         handleSearchBtnClick();
+    //     }
+    // });
 
 }
 
 
 
 
-function timeS(val) {
-    var regex = /(\d+):(\d{2}):(\d{2}),(\d{3})/;
-    var parts = regex.exec(val);
-
-    if (parts === null) {
-        return 0;
-    }
-
-    for (var i = 1; i < 5; i++) {
-        parts[i] = parseInt(parts[i], 10);
-        if (isNaN(parts[i])) parts[i] = 0;
-    }
-
-    // hours + minutes + seconds
-    return parts[1] * 3600 + parts[2] * 60 + parts[3];
-}
+// function timeS(val) {
+//     var regex = /(\d+):(\d{2}):(\d{2}),(\d{3})/;
+//     var parts = regex.exec(val);
+//
+//     if (parts === null) {
+//         return 0;
+//     }
+//
+//     for (var i = 1; i < 5; i++) {
+//         parts[i] = parseInt(parts[i], 10);
+//         if (isNaN(parts[i])) parts[i] = 0;
+//     }
+//
+//     // hours + minutes + seconds
+//     return parts[1] * 3600 + parts[2] * 60 + parts[3];
+// }
