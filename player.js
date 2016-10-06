@@ -106,7 +106,7 @@ function showSubtitles(videoPath){
         textTrack.oncuechange = function(e){
             var cue = this.activeCues[0];
             if (cue){
-                MYAPP.bookmarkedTimePoint = vidEle.currentTime;
+                MYAPP.bookmarkedTimePoint = cue.startTime;
                 var oldCue = document.getElementsByClassName("selected")[0];
                 if (oldCue){
                     oldCue.className = "subtitle";
