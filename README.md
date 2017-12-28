@@ -1,3 +1,9 @@
+## Features
+* Contorl video and its subtitle with shortcuts
+* Show/hide subtitles
+* Click a subtitle to go to the video frame
+* Star your favorite subtitles, and show only starred subtitles
+
 ## 기능 소개
 * 어학공부용 어플
 * 자막과 함꼐 공부
