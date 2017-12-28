@@ -1,8 +1,15 @@
+![Sample screenshot](https://github.com/junghyun87/learning-language-with-subtitles/master/sample.png)
+Source of video and subtitles: https://github.com/brenopolanski/html5-video-webvtt-example
+
 ## Features
 * Contorl video and its subtitle with shortcuts
 * Show/hide subtitles
 * Click a subtitle to go to the video frame
 * Star your favorite subtitles, and show only starred subtitles
+* Copy subtitles to clibboard
+* Subtitles are scrolled automatically
+* Responsive UI
+* Electron-based application. Use HTML, CSS and Javascript
 
 ## 기능 소개
 * 어학공부용 어플
