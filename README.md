@@ -1,4 +1,5 @@
-![Sample screenshot](https://github.com/junghyun87/learning-language-with-subtitles/master/sample.png)
+![Sample screenshot](https://github.com/junghyun87/learning-language-with-subtitles/blob/430d9f5b2de3c8f0f8cb1476948572fd7036a670/sample.png?raw=true)
+
 Source of video and subtitles: https://github.com/brenopolanski/html5-video-webvtt-example
 
 ## Features
